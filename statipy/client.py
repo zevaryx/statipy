@@ -22,7 +22,10 @@ class StatipyClient(Client):
 
     @property
     def client_name(self) -> str:
-        return self.user.username + "#" + self.user.discriminator
+        try:
+            return self.user.username + "#" + str(self.user.discriminator)
+        except Exception:
+            return self.user.id
 
     @listen()
     async def on_startup(self):
