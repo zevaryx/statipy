@@ -13,7 +13,18 @@ def get_now() -> datetime:
 
 async def init_db(host: str = "localhost", port: int = 27017, username: str = None, password: str = None):
     client = AsyncIOMotorClient(username=username, password=password, host=host, port=port)
-    await init_beanie(database=client["statipy"], document_models=[Stat])
+    await init_beanie(database=client["statipy"], document_models=[Stat, StaticStat])
+
+
+
+class StaticStat(Document):
+    name: str
+    client_id: int
+    client_name: str
+    value: float | int | str
+    guild_id: Optional[int]
+    guild_name: Optional[str]
+    dm: bool = False
 
 
 class Metadata(BaseModel):

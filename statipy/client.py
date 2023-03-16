@@ -10,10 +10,10 @@ from statipy.db import SlashMetadata, Metadata, Stat, init_db
 class StatipyClient(Client):
     @property
     def client_name(self) -> str:
-        try:
+        if self.user.username:
             return self.user.username + "#" + str(self.user.discriminator)
-        except Exception:
-            return self.user.id
+        else:
+            return str(self.user.id)
 
     async def syncronise_interactions(self) -> None:
         st = time.time()
