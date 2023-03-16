@@ -8,28 +8,12 @@ from statipy.db import SlashMetadata, Metadata, Stat, init_db
 
 
 class StatipyClient(Client):
-    def __init__(
-        self,
-        mongo_user: str = None,
-        mongo_pass: str = None,
-        mongo_host: str = "localhost",
-        mongo_port: int = 27017,
-        *args,
-        **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        self.mongo = {"host": mongo_host, "username": mongo_user, "password": mongo_pass, "port": mongo_port}
-
     @property
     def client_name(self) -> str:
         try:
             return self.user.username + "#" + str(self.user.discriminator)
         except Exception:
             return self.user.id
-
-    @listen()
-    async def on_startup(self):
-        await init_db(**self.mongo)
 
     async def syncronise_interactions(self) -> None:
         st = time.time()
