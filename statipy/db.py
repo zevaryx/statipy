@@ -11,8 +11,8 @@ def get_now() -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
-async def init_db(host: str = "localhost", port: int = 27017, user: str = None, password: str = None):
-    client = AsyncIOMotorClient(username=user, password=password, host=host, port=port)
+async def init_db(host: str = "localhost", port: int = 27017, username: str = None, password: str = None):
+    client = AsyncIOMotorClient(username=username, password=password, host=host, port=port)
     await init_beanie(database=client["statipy"], document_models=[Stat])
 
 
