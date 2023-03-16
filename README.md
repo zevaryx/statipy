@@ -6,7 +6,7 @@ Track your interactions.py bot statistics!
 
 ### Prerequites
 
-- A MongoDB instance
+- MongoDB 5.0 or newer
 - `beanie==1.17.0`
 - `interactions>=5.0`
 
