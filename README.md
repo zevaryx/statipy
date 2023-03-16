@@ -13,19 +13,25 @@ Track your interactions.py bot statistics!
 ## Usage
 
 ```py
+import asyncio
 from statipy import StatipyClient, init_db
 
-client = StatipyClient()
 
-client.load_extension("statipy.ext")
+async def run():
+    await init_db()
+    client = StatipyClient()
 
-client.start("token")
+    client.load_extension("statipy.ext")
+
+    client.astart("token")
+
+asyncio.run(run())
 ```
 
 ## Advanced Settings
 
 ```py
-client = StatipyClient(
+await init_db(
     mongo_user="username",
     mongo_pass="password",
     mongo_host="host",
