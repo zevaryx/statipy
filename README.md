@@ -17,7 +17,7 @@ from statipy import StatipyClient, init_db
 
 client = StatipyClient()
 
-client.load_extension("statipy.client")
+client.load_extension("statipy.ext")
 
 client.start("token")
 ```
