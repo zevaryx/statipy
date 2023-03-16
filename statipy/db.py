@@ -20,7 +20,7 @@ class Metadata(BaseModel):
     client_id: int
     client_name: str
     name: str
-    value: int | str
+    value: float | int | str
 
 
 class CacheMetadata(Metadata):
