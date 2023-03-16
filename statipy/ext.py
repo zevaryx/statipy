@@ -59,13 +59,13 @@ class Stats(Extension):
         major, minor, patch, *_ = sys.version_info
 
         await Stat(
-            md=Metadata(
+            meta=Metadata(
                 name="library_version", client_id=self.bot.user.id, client_name=self.bot.client_name, value=__version__
             )
         ).insert()
 
         await Stat(
-            md=Metadata(
+            meta=Metadata(
                 name="python_version",
                 client_id=self.bot.user.id,
                 client_name=self.bot.client_name,

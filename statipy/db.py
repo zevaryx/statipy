@@ -46,7 +46,7 @@ class SlashMetadata(GuildMetadata):
 
 
 class Stat(Document):
-    timestamp: datetime = Field(default=get_now)
+    timestamp: datetime = Field(default_factory=get_now)
     meta: Metadata
 
     class Settings:
