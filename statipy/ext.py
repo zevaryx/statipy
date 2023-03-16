@@ -190,6 +190,8 @@ class Stats(Extension):
 
     @listen(delay_until_ready=True)
     async def on_guild_join(self, _):
+        if not self.bot.is_ready:
+            return
         md = Metadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
@@ -215,6 +217,8 @@ class Stats(Extension):
 
     @listen(delay_until_ready=True)
     async def on_guild_left(self, _):
+        if not self.bot.is_ready:
+            return
         md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="guild_event", value=-1)
         await Stat(meta=md).insert()
 
