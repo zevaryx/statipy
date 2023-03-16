@@ -1,0 +1,2 @@
+beanie==1.17.0
+interactions>=5.0
