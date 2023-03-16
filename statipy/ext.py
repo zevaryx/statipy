@@ -1,6 +1,5 @@
 import inspect
 import sys
-from collections import deque
 
 from interactions import Extension, Intents, IntervalTrigger, Task, events, listen, __version__
 from interactions.client.utils.cache import TTLCache
@@ -19,9 +18,8 @@ class Stats(Extension):
         }
 
     async def collect_stats(self):
-        latency: deque
         if latency := self.bot.ws.latency:
-            md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="latency", value=latency.pop())
+            md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="latency", value=latency)
             await Stat(meta=md).insert()
 
         for name, cache in self.bot_caches.items():
