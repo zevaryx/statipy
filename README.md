@@ -32,9 +32,9 @@ asyncio.run(run())
 
 ```py
 await init_db(
-    mongo_user="username",
-    mongo_pass="password",
-    mongo_host="host",
-    mongo_port=27017
+    username="username",
+    password="password",
+    host="host",
+    port=27017
 )
 ```
