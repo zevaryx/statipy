@@ -5,7 +5,7 @@ from interactions import Extension, Intents, IntervalTrigger, Task, events, list
 from interactions.client.utils.cache import TTLCache
 
 from statipy.client import StatipyClient
-from statipy.db import CacheMetadata, ChannelMetadata, GuildMetadata, Metadata, Stat
+from statipy.db import CacheMetadata, GuildMetadata, Metadata, Stat
 
 
 class Stats(Extension):
