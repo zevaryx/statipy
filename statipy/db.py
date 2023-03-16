@@ -52,7 +52,7 @@ class ChannelMetadata(GuildMetadata):
 class SlashMetadata(GuildMetadata):
     base_name: Optional[str]
     group_name: Optional[str]
-    command_name: str
+    command_name: Optional[str]
     command_id: int
 
 

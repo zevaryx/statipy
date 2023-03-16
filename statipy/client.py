@@ -38,23 +38,27 @@ class StatipyClient(Client):
             guild_id = ctx.guild.id
             guild_name = ctx.guild.name
             dm = False
+        try:
+            md = SlashMetadata(
+                client_id=self.user.id,
+                client_name=self.client_name,
+                base_name=command.name.default,
+                command_id=ctx.command_id,
+                guild_id=guild_id,
+                guild_name=guild_name,
+                name="command_run",
+                dm=dm,
+                value=1,
+            )
+            if isinstance(ctx, SlashContext):
+                md.group_name = command.group_name.default
+                md.command_name = command.sub_cmd_name.default
 
-        md = SlashMetadata(
-            client_id=self.user.id,
-            client_name=self.client_name,
-            base_name=command.name.default,
-            command_id=ctx.command_id,
-            guild_id=guild_id,
-            guild_name=guild_name,
-            name="command_run",
-            dm=dm,
-        )
-        if isinstance(ctx, SlashContext):
-            md.group_name = command.group_name.default
-            md.command_name = command.sub_cmd_name.default
-
-        stat = Stat(meta=md)
-        await stat.insert()
+            stat = Stat(meta=md)
+            await stat.insert()
+        except Exception:
+            self.logger.error("Error saving statistics", exc_info=True)
+        return await command(ctx, **ctx.kwargs)
 
     async def on_command_error(self, ctx: BaseContext, error: Exception, *args, **kwargs) -> None:
         if not isinstance(ctx, PrefixedContext):
@@ -76,6 +80,7 @@ class StatipyClient(Client):
                 guild_name=guild_name,
                 name="command_error",
                 dm=dm,
+                value=1,
             )
             if isinstance(ctx, SlashContext):
                 md.group_name = command.group_name.default
