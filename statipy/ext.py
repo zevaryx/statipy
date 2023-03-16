@@ -9,50 +9,56 @@ from statipy.db import CacheMetadata, GuildMetadata, Metadata, Stat
 
 
 class Stats(Extension):
-    def __init__(self, bot: StatipyClient):
+    def __init__(self, bot: StatipyClient, include_cache: bool = False):
         self.bot = bot
-        self.bot_caches = {
-            name.removesuffix("_cache"): cache
-            for name, cache in inspect.getmembers(self.bot.cache, predicate=lambda x: isinstance(x, dict))
-            if not name.startswith("__")
-        }
+        self.include_cache = include_cache
+        if self.include_cache:
+            self.bot.logger.warn("Statipy include_cache is true! This will insert very many documents into your database")
+            self.bot_caches = {
+                c[0]: getattr(bot.cache, c[0])
+                for c in inspect.getmembers(bot.cache, predicate=lambda x: isinstance(x, dict))
+                if not c[0].startswith("__")
+            }
+            self.bot_caches["endpoints"] = self.bot.http._endpoints
+            self.bot_caches["rate_limits"] = self.bot.http.ratelimit_locks
 
     async def collect_stats(self):
         if latency := self.bot.ws.latency:
             md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="latency", value=latency)
             await Stat(meta=md).insert()
 
-        for name, cache in self.bot_caches.items():
-            md = CacheMetadata(
-                client_id=self.bot.user.id,
-                client_name=self.bot.client_name,
-                name="cache",
-                cache_name=name,
-                value=len(cache),
-            )
-            await Stat(meta=md).insert()
+        if self.include_cache:
+            for name, cache in self.bot_caches.items():
+                md = CacheMetadata(
+                    client_id=self.bot.user.id,
+                    client_name=self.bot.client_name,
+                    name="cache",
+                    cache_name=name,
+                    value=len(cache),
+                )
+                await Stat(meta=md).insert()
 
-            soft_md = CacheMetadata(
-                client_id=self.bot.user.id,
-                client_name=self.bot.client_name,
-                name="cache_soft_limit",
-                cache_name=name,
-                value="inf",
-            )
-            hard_md = CacheMetadata(
-                client_id=self.bot.user.id,
-                client_name=self.bot.client_name,
-                name="cache_hard_limit",
-                cache_name=name,
-                value="inf",
-            )
+                soft_md = CacheMetadata(
+                    client_id=self.bot.user.id,
+                    client_name=self.bot.client_name,
+                    name="cache_soft_limit",
+                    cache_name=name,
+                    value="inf",
+                )
+                hard_md = CacheMetadata(
+                    client_id=self.bot.user.id,
+                    client_name=self.bot.client_name,
+                    name="cache_hard_limit",
+                    cache_name=name,
+                    value="inf",
+                )
 
-            if isinstance(cache, TTLCache):
-                soft_md.value = cache.soft_limit
-                hard_md.value = cache.hard_limit
+                if isinstance(cache, TTLCache):
+                    soft_md.value = cache.soft_limit
+                    hard_md.value = cache.hard_limit
 
-            await Stat(meta=soft_md).insert()
-            await Stat(meta=hard_md).insert()
+                await Stat(meta=soft_md).insert()
+                await Stat(meta=hard_md).insert()
 
     @listen(delay_until_ready=True)
     async def on_ready(self) -> None:
@@ -136,7 +142,7 @@ class Stats(Extension):
     @listen(delay_until_ready=True)
     async def on_guild_left(self, _):
         md = Metadata(
-            client_id=self.bot.user.id, client_name=self.bot.client_name, name="guild_event", value=len(self.bot.guilds)
+            client_id=self.bot.user.id, client_name=self.bot.client_name, name="total_guilds", value=len(self.bot.guilds)
         )
         await Stat(meta=md).insert()
 
@@ -195,7 +201,7 @@ class Stats(Extension):
         await Stat(meta=md).insert()
 
 
-def setup(bot: StatipyClient):
+def setup(bot: StatipyClient, include_cache: bool = False):
     if not isinstance(bot, StatipyClient):
         raise ValueError("This extension can only be used with a StatipyClient")
-    Stats(bot)
+    Stats(bot, include_cache)

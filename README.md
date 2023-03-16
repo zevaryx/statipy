@@ -37,4 +37,7 @@ await init_db(
     host="host",
     port=27017
 )
+
+# include_cache=True will flood your database! Use with caution
+client.load_extension("statipy.ext", include_cache=True)
 ```
