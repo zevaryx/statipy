@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from beanie import Document, Granularity, TimeSeriesConfig, init_beanie
@@ -11,17 +11,26 @@ def get_now() -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
-async def init_db(host: str = "localhost", port: int = 27017, username: str = None, password: str = None):
-    client = AsyncIOMotorClient(username=username, password=password, host=host, port=port)
+async def init_db(
+    username: str,
+    password: str,
+    port: int = 27017,
+    host: str = None,
+    hosts: list[str] = None,
+    replicaset: str = None,
+):
+    if not replicaset:
+        client = AsyncIOMotorClient(username=username, password=password, host=host, port=port)
+    else:
+        client = AsyncIOMotorClient(hosts, username=username, password=password, replicaset=replicaset)
     await init_beanie(database=client["statipy"], document_models=[Stat, StaticStat])
-
 
 
 class StaticStat(Document):
     name: str
     client_id: int
     client_name: str
-    value: float | int | str
+    value: float | int | str | timedelta
     guild_id: Optional[int]
     guild_name: Optional[str]
     dm: bool = False
@@ -30,8 +39,7 @@ class StaticStat(Document):
 class Metadata(BaseModel):
     client_id: int
     client_name: str
-    name: str
-    value: float | int | str
+    value: float | int | str | timedelta
 
 
 class CacheMetadata(Metadata):
@@ -57,6 +65,7 @@ class SlashMetadata(GuildMetadata):
 
 
 class Stat(Document):
+    name: str
     timestamp: datetime = Field(default_factory=get_now)
     meta: Metadata
 

@@ -46,7 +46,6 @@ class StatipyClient(Client):
                 command_id=ctx.command_id,
                 guild_id=guild_id,
                 guild_name=guild_name,
-                name="command_run",
                 dm=dm,
                 value=1,
             )
@@ -54,7 +53,7 @@ class StatipyClient(Client):
                 md.group_name = command.group_name.default
                 md.command_name = command.sub_cmd_name.default
 
-            stat = Stat(meta=md)
+            stat = Stat(meta=md, name="command_run")
             await stat.insert()
         except Exception:
             self.logger.error("Error saving statistics", exc_info=True)
@@ -78,7 +77,6 @@ class StatipyClient(Client):
                 command_id=ctx.command_id,
                 guild_id=guild_id,
                 guild_name=guild_name,
-                name="command_error",
                 dm=dm,
                 value=1,
             )
@@ -86,5 +84,5 @@ class StatipyClient(Client):
                 md.group_name = command.group_name.default
                 md.command_name = command.sub_cmd_name.default
 
-            stat = Stat(meta=md)
+            stat = Stat(meta=md, name="command_error")
             await stat.insert()

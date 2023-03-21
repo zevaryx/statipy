@@ -1,5 +1,6 @@
 import inspect
 import sys
+from datetime import datetime, timezone
 
 from beanie.operators import Inc, Set
 from interactions import Extension, Intents, IntervalTrigger, Task, events, listen, __version__
@@ -24,31 +25,50 @@ class Stats(Extension):
 
     async def collect_stats(self):
         if latency := self.bot.ws.latency:
-            md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="latency", value=latency)
-            await Stat(meta=md).insert()
+            md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, value=latency)
+            await Stat(meta=md, name="latency").insert()
+            
+        uptime = datetime.now() - self.bot.start_time.replace()
+        days = uptime.days
+        hours, r = divmod(uptime.seconds, 3600)
+        minutes, seconds = divmod(r, 60)
+        uptime = f"{days}d {hours}h {minutes}m {seconds}s"  
+        await StaticStat.find_one(
+            StaticStat.name == "uptime", StaticStat.client_id == self.bot.user.id
+        ).upsert(
+            Set(
+                {
+                    StaticStat.client_name: self.bot.client_name,
+                    StaticStat.value: uptime,
+                }
+            ),
+            on_insert=StaticStat(
+                name="uptime",
+                client_id=self.bot.user.id,
+                client_name=self.bot.client_name,
+                value=uptime,
+            ),
+        )
 
         if self.include_cache:
             for name, cache in self.bot_caches.items():
                 md = CacheMetadata(
                     client_id=self.bot.user.id,
                     client_name=self.bot.client_name,
-                    name="cache",
                     cache_name=name,
                     value=len(cache),
                 )
-                await Stat(meta=md).insert()
+                await Stat(meta=md, name="cache").insert()
 
                 soft_md = CacheMetadata(
                     client_id=self.bot.user.id,
                     client_name=self.bot.client_name,
-                    name="cache_soft_limit",
                     cache_name=name,
                     value="inf",
                 )
                 hard_md = CacheMetadata(
                     client_id=self.bot.user.id,
                     client_name=self.bot.client_name,
-                    name="cache_hard_limit",
                     cache_name=name,
                     value="inf",
                 )
@@ -57,8 +77,8 @@ class Stats(Extension):
                     soft_md.value = cache.soft_limit
                     hard_md.value = cache.hard_limit
 
-                await Stat(meta=soft_md).insert()
-                await Stat(meta=hard_md).insert()
+                await Stat(meta=soft_md, name="cache_soft_limit").insert()
+                await Stat(meta=hard_md, name="cache_hard_limit").insert()
 
     @listen(delay_until_ready=True)
     async def on_ready(self) -> None:
@@ -180,13 +200,12 @@ class Stats(Extension):
         md = GuildMetadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="message_received",
             value=1,
             guild_id=guild_id,
             guild_name=guild_name,
             dm=dm,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="message_received").insert()
 
     @listen(delay_until_ready=True)
     async def on_guild_join(self, _):
@@ -195,10 +214,9 @@ class Stats(Extension):
         md = Metadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="guild_event",
             value=1,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="guild_event").insert()
 
         await StaticStat.find_one(StaticStat.name == "total_guilds", StaticStat.client_id == self.bot.user.id).upsert(
             Set(
@@ -219,8 +237,8 @@ class Stats(Extension):
     async def on_guild_left(self, _):
         if not self.bot.is_ready:
             return
-        md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, name="guild_event", value=-1)
-        await Stat(meta=md).insert()
+        md = Metadata(client_id=self.bot.user.id, client_name=self.bot.client_name, value=-1)
+        await Stat(meta=md, name="guild_event").insert()
 
         await StaticStat.find_one(StaticStat.name == "total_guilds", StaticStat.client_id == self.bot.user.id).upsert(
             Set(
@@ -246,12 +264,11 @@ class Stats(Extension):
         md = GuildMetadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="member_event",
             value=1,
             guild_id=event.guild.id,
             guild_name=event.guild.name,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="member_event").insert()
 
         members = StaticStat(
             client_id=self.bot.user.id,
@@ -286,12 +303,11 @@ class Stats(Extension):
         md = GuildMetadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="member_event",
             value=-1,
             guild_id=event.guild.id,
             guild_name=event.guild.name,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="member_event").insert()
 
         members = StaticStat(
             client_id=self.bot.user.id,
@@ -322,12 +338,11 @@ class Stats(Extension):
         md = GuildMetadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="channel_event",
             value=1,
             guild_id=event.guild.id,
             guild_name=event.guild.name,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="channel_event").insert()
 
         channels = StaticStat(
             client_id=self.bot.user.id,
@@ -358,12 +373,11 @@ class Stats(Extension):
         md = GuildMetadata(
             client_id=self.bot.user.id,
             client_name=self.bot.client_name,
-            name="channel_event",
             value=-1,
             guild_id=event.guild.id,
             guild_name=event.guild.name,
         )
-        await Stat(meta=md).insert()
+        await Stat(meta=md, name="channel_event").insert()
 
         channels = StaticStat(
             client_id=self.bot.user.id,
