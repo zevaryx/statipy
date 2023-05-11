@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
-interactions-py = ">=5.3,<4"
+interactions-py = ">=5.3,<6"
 beanie = "^1.17.0"
 
 
