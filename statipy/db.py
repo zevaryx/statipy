@@ -31,8 +31,8 @@ class StaticStat(Document):
     client_id: int
     client_name: str
     value: float | int | str | timedelta
-    guild_id: Optional[int]
-    guild_name: Optional[str]
+    guild_id: Optional[int] = None
+    guild_name: Optional[str] = None
     dm: bool = False
 
 
@@ -47,20 +47,20 @@ class CacheMetadata(Metadata):
 
 
 class GuildMetadata(Metadata):
-    guild_id: Optional[int]
-    guild_name: Optional[str]
+    guild_id: Optional[int] = None
+    guild_name: Optional[str] = None
     dm: bool = False
 
 
 class ChannelMetadata(GuildMetadata):
-    channel_id: Optional[int]
-    channel_name: Optional[str]
+    channel_id: Optional[int] = None
+    channel_name: Optional[str] = None
 
 
 class SlashMetadata(GuildMetadata):
-    base_name: Optional[str]
-    group_name: Optional[str]
-    command_name: Optional[str]
+    base_name: Optional[str] = None
+    group_name: Optional[str] = None
+    command_name: Optional[str] = None
     command_id: int
 
 
